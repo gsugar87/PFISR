@@ -1,3 +1,12 @@
 # ignore mat files
 *.mat
 *.avi
+*.jpg
+*.png
+*.bmp
+*.log
+*.xml
+*.fits
+*.h5
+*.txt
+*.db
