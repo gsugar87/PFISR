@@ -81,7 +81,7 @@ else
     tUTC = [];
 end %if isemptyFrameRate
 %% use nmea file or user specification to determine start time
-~isempty(startUTC)
+~isempty(startUTC);
 if ~isempty(startUTC)
    if strcmpi(startUTC,'auto') % grep XML
      NMEAfn = [BigDir,'/',BigStem,'.nmea'];
@@ -97,24 +97,24 @@ if ~isempty(startUTC)
           gprmc = textscan(nmeatxt,'%s %d %s %f %s %f %s %f %f %d %f %s','delimiter',',','emptyvalue',nan);
       end
      end %while
-     gprmc
-     gprmc{10}
-      dates = int2str(gprmc{10}) %for ensuring no decimal point is thrown in
-      dummydate=num2str(dates)
+     gprmc;
+     gprmc{10};
+      dates = int2str(gprmc{10}); %for ensuring no decimal point is thrown in
+      dummydate=num2str(dates);
       % % FORMAT IS Year Month Day
       if length(dates)==5
-          dates=[str2num(dummydate(4:5))+2000,str2num(dummydate(2:3)),str2num(dummydate(1))]
+          dates=[str2num(dummydate(4:5))+2000,str2num(dummydate(2:3)),str2num(dummydate(1))];
       else
-          dates=[str2num(dummydate(5:6))+2000,str2num(dummydate(3:4)),str2num(dummydate(1:2))]
+          dates=[str2num(dummydate(5:6))+2000,str2num(dummydate(3:4)),str2num(dummydate(1:2))];
       end
-      times = int2str(gprmc{2})
+      times = int2str(gprmc{2});
           %likewise
       % % FORMAT Hours Min Sec
-      dummytimes=num2str(times)
-      if times==5
-          times=[str2num(dummytimes(1)),str2num(dummytimes(2:3)),str2num(dummytimes(4:5))]
+      dummytimes=num2str(times);
+      if numel(times)==5
+          times=[str2num(dummytimes(1)),str2num(dummytimes(2:3)),str2num(dummytimes(4:5))];
       else
-          times=[str2num(dummytimes(1:2)),str2num(dummytimes(3:4)),str2num(dummytimes(5:6))]
+          times=[str2num(dummytimes(1:2)),str2num(dummytimes(3:4)),str2num(dummytimes(5:6))];
       end
       if ~isempty(dates) && all(~isnan(dates)),
           startUTC = datenum([dates,times]);

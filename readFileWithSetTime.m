@@ -1,9 +1,9 @@
 close all
 time = 1396170000;
 time = time - 9*60*60; %march 30 2014
+%time = time + 24*60*60; %march 31 2014 UTC
 month = 3;
 day = 31;
-%time = time + 24*60*60; %march 31 2014 UTC
 % hour = 8;
 % minute = 25;
 % second = 52;
@@ -25,7 +25,22 @@ day = 31;
 %eventTime = [12, 23, 29];
 %eventTime = [12, 39, 04];
 %eventTime = [10, 56, 34];
-eventTime = [10,57,54];
+%eventTime = [10,57,54];
+%eventTime = [13,20,50];
+%eventTime = [13,32,43];
+%% 31st data
+%eventTime = [06,36,35];
+%eventTime = [06,47,08];
+%eventTime = [09,07,22];
+%eventTime = [10,17,23];
+%eventTime = [10,38,08];
+%eventTime = [10,46,42];
+%eventTime = [11,29,33];
+%eventTime = [12,18,57];
+%eventTime = [12,22,39];
+%eventTime = [12,58,09];
+eventTime = [10,53,53];
+
 hour = eventTime(1);
 minute = eventTime(2);
 second = eventTime(3);

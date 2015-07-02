@@ -4,16 +4,26 @@
 % UTC time (this is in days)
 % radar time (tms) is in unix time.  To convert to matlab time you need to
 % do: unix_time/86400 + datenum(1970,1,1))
-clear all
+%clear all
 close all
 
 %choose what meteor to read in
-for meteorNumber = [1 2 3 4 5 6 7 9];
-%meteorNumber = 4;
+%for meteorNumber = [1 2 3 4 5 6 7 9];
+%meteorsToAnalyze = [1 2 3 5 6 7 9 13 18 20 24 27 29];
+%pRangeFit =        [1 1 1 1 2 1 1  2  1  
+meteorsToAnalyze = 18;
+pRangeFit = 1; %degree of polynomial to fit the radar range for optical range extrapolation
+velocitiesMean = zeros(1,numel(meteorsToAnalyze));
+velocitiesStd =  zeros(1,numel(meteorsToAnalyze));
+altitudesMean = zeros(1,numel(meteorsToAnalyze));
+altitudesMin = zeros(1,numel(meteorsToAnalyze));
+altitudesMax = zeros(1,numel(meteorsToAnalyze));
+for meteorToAnalyzeIndex = numel(meteorsToAnalyze);
+meteorNumber = meteorsToAnalyze(meteorToAnalyzeIndex);
 
 %set show movies or not
-show_SBR = 1; %show a movie of the signal to background ratio
-show_signal = 1; %%show a movie of the signal (intensity - background)
+show_SBR = 0; %show a movie of the signal to background ratio
+show_signal = 0; %%show a movie of the signal (intensity - background)
 plotPauseTime = 0.01; %pause time between SBR strip plots
 
 %set some needed constants
@@ -32,7 +42,6 @@ SBRMaskthresh = 1.4; %1.2;
 SBRsmallerThresh = 0.6;
 SBREndPointThresh = 0.6; %0.6
 pixelVelThreshFactor = 0.2; %factor to throw away possible meteor points in the optical frame
-pRangeFit = 1; %degree of polynomial to fit the radar range for optical range extrapolation
 %rcs variables
 powerTransmit = 2e6; %2 megaWatts (check this!)
 radarGain = 43; %43dbi gain
@@ -53,7 +62,28 @@ opticalFilenames = {'0330105633ultra.mat',
     '0330114821ultra.mat',
     '0330121306ultra.mat',
     '0330122329ultra.mat',
-    '0330123903ultra.mat'};
+    '0330123903ultra.mat', %start the 31st data next line
+    '0331131516ultra.mat',
+    '033112598ultra.mat',
+    '033112589ultra.mat',
+    '0331124154ultra.mat',
+    '0331124035ultra.mat',
+    '0331122239ultra.mat',
+    '0331121857ultra.mat',
+    '0331113559ultra.mat',
+    '0331112933ultra.mat',
+    '0331112056ultra.mat',
+    '0331104642ultra.mat',
+    '033110388ultra.mat',
+    '0331101723ultra.mat',
+    '033110244ultra.mat',
+    '033195531ultra.mat',
+    '033194147ultra.mat',
+    '033193226ultra.mat',
+    '033192643ultra.mat',
+    '033192558ultra.mat',
+    '03319722ultra.mat',
+    '033182858ultra.mat'};
 radarFilenames = {'0331105634.mat',
     '0331105754.mat',
     '033111015.mat',
@@ -62,9 +92,30 @@ radarFilenames = {'0331105634.mat',
     '0331114822.mat',
     '033112137.mat',
     '0331122329.mat',
-    '033112394.mat'};
+    '033112394.mat', %start of 31st data next line
+    '0331131516.mat',
+    '033112598.mat',
+    '033112589.mat',
+    '0331124154.mat',
+    '0331124035.mat',
+    '0331122239.mat',
+    '0331121857.mat',
+    '0331113559.mat',
+    '0331112933.mat',
+    '0331112056.mat',
+    '0331104642.mat',
+    '033110388.mat',
+    '0331101723.mat',
+    '033110244.mat',
+    '033195531.mat',
+    '033194147.mat',
+    '033193226.mat',
+    '033192643.mat',
+    '033192558.mat',
+    '03319722.mat',
+    '033182858.mat'};
 totalFramesAllMeteors = [13, 26, 14, 34, 55, 25, 41, 19, 17, 25];
-startFramesAllMeteors = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+startFramesAllMeteors = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20,1,];
 goodHoughIndeces = {[2 3 4 5];
     [2 3 4 5 6 7 8 9 10 11 12 14 15 16 17 18 19 ];
     [ ];
@@ -76,11 +127,22 @@ goodHoughIndeces = {[2 3 4 5];
     [ ];
     [ ]};
 
-%read in the desired meteor
+%read in the desired meteor (different for 30th and 31st data)
+%load the radar and optical data
 filenameOptical = opticalFilenames{meteorNumber};
 filenameRadar = radarFilenames{meteorNumber};
-numOpticalFrames = totalFramesAllMeteors(meteorNumber);
-startFrame = startFramesAllMeteors(meteorNumber);
+load([directoryRadar filenameRadar])
+load([directoryOptical filenameOptical])
+
+if meteorNumber <= 9
+    numOpticalFrames = totalFramesAllMeteors(meteorNumber);
+    startFrame = startFramesAllMeteors(meteorNumber);
+    endFrame = startFrame+numOpticalFrames;
+else
+    startFrame = 3;
+    endFrame = size(dataUltra,3)-2;
+    numOpticalFrames = endFrame-startFrame;
+end
 
 %load the radar and optical data
 load([directoryRadar filenameRadar])
@@ -88,9 +150,9 @@ load([directoryOptical filenameOptical])
 
 %% Optical Analysis
 %convert data type to double and extract the data we care about
-dataUltra = double(dataUltra(:,:,startFrame:startFrame+numOpticalFrames));
+dataUltra = double(dataUltra(:,:,startFrame:endFrame));
 dataUltraBackground = double(dataUltraBackground);
-tUTCU = tUTCU(startFrame:startFrame+numOpticalFrames);
+tUTCU = tUTCU(startFrame:endFrame);
 
 %get the SBR (signal to background noise)
 SBR = zeros(size(dataUltra));
@@ -278,8 +340,8 @@ for i = 1:size(SBR,3)
         end
     end
 end
-
-
+xCoords(xCoords >= 512) = 512;
+yCoords(yCoords >= 512) = 512;
 
 %(TESTING) do a time lapse plot of the coordinates
 for i = 1:size(SBR,3)
@@ -455,6 +517,20 @@ for i = 1:numel(radarGoodIndeces)
    radarGoodRanges(i) = wideBeamRange(maxPowerIndex);
    radarGoodPowers(i) = radarPowerForRange(maxPowerIndex,radarGoodIndeces(i));
 end
+%ignore radar range outliers (2 std devs)
+radarGoodIndeces = radarGoodIndeces(abs(radarGoodRanges-...
+    mean(radarGoodRanges)) < std(radarGoodRanges)*1.3);
+radarGoodRanges = zeros(1,numel(radarGoodIndeces));
+radarGoodPowers = zeros(1,numel(radarGoodIndeces));
+%recalculate the ranges and powers with the new good indeces
+for i = 1:numel(radarGoodIndeces)
+   %get the index of maximum power at the good indeces
+   [~,maxPowerIndex] = max(radarPowerForRange(:,radarGoodIndeces(i)));
+   %get the range value at the index
+   radarGoodRanges(i) = wideBeamRange(maxPowerIndex);
+   radarGoodPowers(i) = radarPowerForRange(maxPowerIndex,radarGoodIndeces(i));
+end
+
 %find the indeces of the times we care about
 radarValidTimeIndeces = zeros(1,numel(meteorTimes));
 meteorRange = zeros(1,numel(meteorTimes));
@@ -464,8 +540,10 @@ end
 %get an interpolation for the data for the frames we care about
 %meteorTimeFit = polyfit(wideBeamTime(radarGoodIndeces),radarGoodRanges,1);
 %meteorRanges = meteorTimeFit(1)*meteorTimes+meteorTimeFit(2);
-meteorTimeFit = polyfit(timeForRange(radarGoodIndeces),radarGoodRanges,pRangeFit);
-meteorRanges = polyval(meteorTimeFit,meteorTimes);
+meteorTimeFit = polyfit((timeForRange(radarGoodIndeces)-...
+    timeForRange(radarGoodIndeces(1)))*matlabTmsInSec,...
+    radarGoodRanges,pRangeFit);
+meteorRanges = polyval(meteorTimeFit,(meteorTimes-timeForRange(radarGoodIndeces(1)))*matlabTmsInSec);
 
 %(TESTING) Plot the meteor ranges from the radar, and the extrapolated
 %values on the same graph
@@ -482,6 +560,11 @@ ylabel('Range (km)')
 title('Meteor Ranges From Radar and Extrapolated to Optical Time')
 %(END TESTING)
 
+%%FOR LORENZO!!%%
+lorenzoTime = wideBeamTime(radarGoodIndeces);
+lorenzoRanges = radarGoodRanges;
+save([opticalFilenames{meteorNumber}(1:end-9) 'lorenzo.mat'],'lorenzoTime','lorenzoRanges')
+
 %so now we have the range, azimuth, and elevation of the meteor
 %let's find the velocity!
 %convert to cartesian coordinates
@@ -491,22 +574,24 @@ meteorZ = meteorRanges.*cosd(90-meteorEl);
 meteorVel = sqrt((meteorX(2:end)-meteorX(1:end-1)).^2+(meteorY(2:end)-meteorY(1:end-1)).^2+(meteorZ(2:end)-meteorZ(1:end-1)).^2)./(meteorTimes(2:end)-meteorTimes(1:end-1))./matlabTmsInSec;
 %(TESTING) Plot the meteor position
 figure(5)
+fontsize = 20;
+set(gca,'fontsize',fontsize)
 movegui('south')
-plot3(meteorX,meteorY,meteorZ)
+plot3(meteorX,meteorY,meteorZ,'linewidth',3)
 hold on
-plot3(meteorX,meteorY,meteorZ,'x')
-for i = 1:numel(meteorX)
-    text(meteorX(i),meteorY(i),meteorZ(i), num2str(meteorFrame(i)), 'VerticalAlignment','bottom', ...
-                                                            'HorizontalAlignment','right')
-    text(meteorX(i),meteorY(i),meteorZ(i), ['\color{red} ' num2str(round(meteorWideGain(i)))],'VerticalAlignment','top', ...
-                                                            'HorizontalAlignment','left')                                      
-end
-xlabel('X Position (km)')
-ylabel('Y Position (km)')
-zlabel('Altitude (km)')
+plot3(meteorX,meteorY,meteorZ,'+','markers',12,'linewidth',3)
+%for i = 1:numel(meteorX)
+%    text(meteorX(i),meteorY(i),meteorZ(i), num2str(meteorFrame(i)), 'VerticalAlignment','bottom', ...
+%                                                            'HorizontalAlignment','right')
+%    text(meteorX(i),meteorY(i),meteorZ(i), ['\color{red} ' num2str(round(meteorWideGain(i)))],'VerticalAlignment','top', ...
+%                                                            'HorizontalAlignment','left')                                      
+%end
+xlabel('X Position (km)','fontsize',fontsize)
+ylabel('Y Position (km)','fontsize',fontsize)
+zlabel('Altitude (km)','fontsize',fontsize)
 grid on
 %hold off
-title('Meteor Position')
+title('Meteor Position','fontsize',fontsize)
 %plot the meteor velocity vs time
 figure(6)
 movegui('southeast')
@@ -515,26 +600,29 @@ ylabel('Velocity (km/sec)')
 xlabel('Time (sec)')
 title('Meteor Velocity')
 %(END TESTING)
-mean(meteorVel)
-std(meteorVel)
+velocitiesMean(meteorToAnalyzeIndex) = mean(meteorVel);
+velocitiesStd = std(meteorVel);
+altitudesMean(meteorToAnalyzeIndex) = mean(meteorZ);
+altitudesMin(meteorToAnalyzeIndex) = min(meteorZ);
+altitudesMax(meteorToAnalyzeIndex) = max(meteorZ);
 
 %plot the radar data
 figure(7)
 movegui('northwest')
 subplot(2,1,1)
-imagesc((wideBeamTime-wideBeamTime(1))*matlabTmsInSec,wideBeamRange,db(wideBeamPower))
+noiseWB = median(wideBeamPower(:));
+imagesc((wideBeamTime-wideBeamTime(1))*matlabTmsInSec,wideBeamRange,10*log10((wideBeamPower)/noiseWB))
 xlabel('Time (sec)')
 ylabel('Range (km)')
-title('Wide Beam')
+title('Wide Beam (dB)')
 set(gca,'ydir','normal')
 subplot(2,1,2)
-imagesc((narrowBeamTime-wideBeamTime(1))*matlabTmsInSec,narrowBeamRange,db(narrowBeamPower))
+noiseNB = median(narrowBeamPower(:));
+imagesc((narrowBeamTime-wideBeamTime(1))*matlabTmsInSec,narrowBeamRange,10*log10((narrowBeamPower)/noiseNB))
 set(gca,'ydir','normal')
 xlabel('Time (sec)')
 ylabel('Range (km)')
-title('Narrow Beam')
-
-
+title('Narrow Beam (dB)')
 % END OF NEW METHOD 3/9/2015
 
 % Plot movie
@@ -580,5 +668,5 @@ end
 
 %% Get the RCS of the head echo
 powerReceived = radarGoodPowers;
-rcs = powerReceived*4*pi*range.^2/(radarGain*powerTransmit);
+%rcs = powerReceived*4*pi*range.^2/(radarGain*powerTransmit);
 end

@@ -9,7 +9,7 @@ close all
 
 %choose what meteor to read in
 %for meteorNumber = 1:9;
-meteorNumber = 7;
+meteorNumber = 5;
 
 %set show movies or not
 show_SBR = 0; %show a movie of the signal to background ratio

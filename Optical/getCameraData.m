@@ -4,8 +4,11 @@
 close all
 %fileName = 'E:\PFISR Images\UltraPFRR\2014-03-30\2014-03-30T10-46-CamSer7196.DMCdata';
 %fileName = 'G:\PFISR Images\UltraPFRR\2014-03-30\2014-03-30T10-46-CamSer7196.DMCdata';
-fileNameIxon = 'E:\PFISR Images\Ixon\2014-03-30\2014-03-30T10-58-CamSer1387.DMCdata';
-fileNameUltra = 'E:\PFISR Images\UltraPFRR\2014-03-30\2014-03-30T10-46-CamSer7196.DMCdata';
+%fileNameIxon = 'E:\PFISR Images\Ixon\2014-03-30\2014-03-30T10-58-CamSer1387.DMCdata';
+%fileNameIxon = 'Z:\Ultra\2014-03-31\2014-03-31T06-12-CamSer7196.DMCdata';
+%fileNameUltra = 'E:\PFISR Images\UltraPFRR\2014-03-30\2014-03-30T10-46-CamSer7196.DMCdata';
+%fileNameUltra = 'Z:\Ultra\2014-03-31\2014-03-31T06-12-CamSer7196.DMCdata';
+fileNameUltra = 'E:\2014-03-31\2014-03-31T06-12-CamSer7196.DMCdata';
 FPSIxon = 33.00125;
 FPSUltra = 53.00125;
 secondsToCheck = 2;
@@ -39,7 +42,7 @@ load('C:\Users\Glenn\Documents\MATLAB\PFISR\Optical\ultraCalibrate2.mat')
 azU = az;
 elU = el;
 % rawDMCreader(BigFN,xPix,yPix,xBin,yBin,FrameInd,playMovie,Clim,rawFrameRate,startUTC)
-[dataI,~,tUTCI] = rawDMCreaderGlenn(fileNameIxon,xPix,yPix,xBin,yBin,frameStartI:frameEndI,0,ClimI,'auto','auto');
+%[dataI,~,tUTCI] = rawDMCreaderGlenn(fileNameIxon,xPix,yPix,xBin,yBin,frameStartI:frameEndI,0,ClimI,'auto','auto');
 [dataU,~,tUTCU] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,frameStartU:frameEndU,0,ClimU,'auto','auto');
 % Next lines are for saving the calibrated image, which was already
 % created on 7/23/2014 by Glenn
@@ -49,19 +52,19 @@ elU = el;
 % dataImage = dataImage./max(max(dataImage));
 % imwrite(dataImage, 'IxonCalibrate.png', 'png')
 
-frameOneTimeI = datestr(tUTCI(1));
-frameOneSecI = str2num(frameOneTimeI(end-1:end));
-frameOneMinI = str2num(frameOneTimeI(end-4:end-3));
-frameOneHrI = str2num(frameOneTimeI(end-7:end-6));
-frameOneDayI = str2num(frameOneTimeI(1:2));
-frameOneMonthI = frameOneTimeI(4:6);
-if frameOneMonthI == 'Mar'
-    frameOneMonthI = 3.0;
-else
-    frameOneMonthI = 4.0;
-end
-frameOneTimeI = frameOneMonthI*30*24*60*60 + frameOneDayI*24*60*60 + frameOneHrI*60*60 + ...
-    frameOneMinI*60 + frameOneSecI;
+%frameOneTimeI = datestr(tUTCI(1));
+%frameOneSecI = str2num(frameOneTimeI(end-1:end));
+%frameOneMinI = str2num(frameOneTimeI(end-4:end-3));
+%frameOneHrI = str2num(frameOneTimeI(end-7:end-6));
+%frameOneDayI = str2num(frameOneTimeI(1:2));
+%frameOneMonthI = frameOneTimeI(4:6);
+%if frameOneMonthI == 'Mar'
+%    frameOneMonthI = 3.0;
+%else
+%    frameOneMonthI = 4.0;
+%end
+%frameOneTimeI = frameOneMonthI*30*24*60*60 + frameOneDayI*24*60*60 + frameOneHrI*60*60 + ...
+%    frameOneMinI*60 + frameOneSecI;
 frameOneTimeU = datestr(tUTCU(1));
 frameOneSecU = str2num(frameOneTimeU(end-1:end));
 frameOneMinU = str2num(frameOneTimeU(end-4:end-3));
@@ -77,14 +80,14 @@ frameOneTimeU = frameOneMonthU*30*24*60*60 + frameOneDayU*24*60*60 + frameOneHrU
     frameOneMinU*60 + frameOneSecU;
 
 %get number of seconds between the first frame and the desired frame
-secondsIntoFileI = desiredTime-frameOneTimeI+frameStartI/FPSIxon;
+%secondsIntoFileI = desiredTime-frameOneTimeI+frameStartI/FPSIxon;
 secondsIntoFileU = desiredTime-frameOneTimeU+frameStartU/FPSUltra;
-if secondsIntoFileI > 0
-    framesIntoFileI = ceil(secondsIntoFileI*FPSIxon);
-else
-    framesIntoFileI = 0;
-    'Check the desired time'
-end
+%if secondsIntoFileI > 0
+%    framesIntoFileI = ceil(secondsIntoFileI*FPSIxon);
+%else
+%    framesIntoFileI = 0;
+%    'Check the desired time'
+%end
 if secondsIntoFileU > 0
     framesIntoFileU = ceil(secondsIntoFileU*FPSUltra);
 else
@@ -96,14 +99,19 @@ end
 disp('THE CHOSEN FRAMES ARE AT LINES 97-103!!!')
 frameBuffer = 20;
 %fall = [31579 35833];
-%saveFilename = '0330105633ultra.mat';
-fall = [357521 357546];
-saveFilename = '0330123903ultra.mat';
+%saveFilename = '033110244ultra.mat';
+fall = [434311	434324];
+%add 2 frames of buffer space
+fall(1) = fall(1)-2;
+fall(2) = fall(2)+2;
+saveFilename = '033182858ultra.mat';
 finit = fall(1);
 fend = fall(2);
 framesIntoFileU = finit-frameBuffer;
-[dut,~,tUTCUtt] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,finit:fend,1,ClimU,'auto','auto');
-
+'Getting the Ultra Data'
+[dataUltra,~,tUTCU] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,finit:fend,0.1,ClimU,'auto','auto');
+'Getting the Ultra Background'
+[dataUltraBackground,~,tUTCUBackground] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,finit-ceil(FPSUltra*secondsOfBackground)-1:finit-1,playMovie*0.1,ClimU,'auto','auto');
 %'Getting the Classic Data'
 %[dataIxon,~,tUTCI] = rawDMCreaderGlenn(fileNameIxon,xPix,yPix,xBin,yBin,framesIntoFileI:framesIntoFileI+ceil(secondsToCheck*FPSIxon),playMovie,ClimI,'auto','auto');
 %'Getting the Classic Background'
@@ -112,9 +120,9 @@ framesIntoFileU = finit-frameBuffer;
 %dataIxonBackgroundRot = rot90(mean(dataIxonBackground,3));
 'Getting the Ultra Data'
 %[dataUltra,~,tUTCU] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,framesIntoFileU:framesIntoFileEndU,playMovie,ClimU,'auto','auto');
-[dataUltra,~,tUTCU] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,framesIntoFileU:framesIntoFileU+secondsToCheck*FPSUltra,playMovie,ClimU,'auto','auto');
+%[dataUltra,~,tUTCU] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,framesIntoFileU:framesIntoFileU+secondsToCheck*FPSUltra,playMovie*0.1,ClimU,'auto','auto');
 'Getting the Ultra Background'
-[dataUltraBackground,~,tUTCUBackground] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,framesIntoFileU-ceil(FPSUltra*secondsOfBackground)-1:framesIntoFileU-1,playMovie,ClimU,'auto','auto');
+%[dataUltraBackground,~,tUTCUBackground] = rawDMCreaderGlenn(fileNameUltra,xPix,yPix,xBin,yBin,framesIntoFileU-ceil(FPSUltra*secondsOfBackground)-1:framesIntoFileU-1,playMovie*0.1,ClimU,'auto','auto');
 backgroundStdUltra = std(double(dataUltraBackground),[],3);
 dataUltraBackground = mean(dataUltraBackground,3);
 dataMovie = dataUltra;
@@ -143,6 +151,7 @@ meteorImageU = dataStdU./mean(dataUltra,3);
 %get the coordinates of the meteor box
 figure()
 imagesc(meteorImageU)
+set(gca,'ydir','normal')
 title('Ultra Standard Deviation / Mean Intensity')
 colormap(gray)
 % figure()
@@ -163,6 +172,7 @@ if button(1) ~= 1 || button(2) ~= 1
     meteorImageUZoom = meteorImageU(min(yU):max(yU),min(xU):max(xU));
     figure()
     imagesc(meteorImageUZoom)
+    set(gca,'ydir','normal')
     title('Ultra Standard Deviation / Mean Intensity')
     colormap(gray)
     [xUZoom,yUZoom] = ginput(2);
@@ -377,6 +387,7 @@ colormap(gray)
 % colorbar()
 figure()
 imagesc(meteorIntensityUltra2D,[0 max(max(meteorIntensityUltra2D))])
+set(gca,'ydir','normal')
 colorbar()
 title('Ultra Total Signal Zoom')
 colormap(gray)
@@ -384,6 +395,7 @@ colorbar()
 figure()
 imagesc(10*log10(dataSumU(min(yU):max(yU),min(xU):max(xU))./ ...
     (dataUltraBackground(min(yU):max(yU),min(xU):max(xU)).*size(dataUltra,3))))
+set(gca,'ydir','normal')
 title('Ultra SNR Zoom')
 colorbar()
 % figure()
