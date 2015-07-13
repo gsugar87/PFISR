@@ -1,9 +1,16 @@
 close all
 time = 1396170000;
-time = time - 9*60*60; %march 30 2014
-%time = time + 24*60*60; %march 31 2014 UTC
+%time = time - 9*60*60; %march 30 2014
+time = time + 24*60*60; %march 31 2014 UTC
+%new times added on 7/13/2015 by Glenn to make things clearer
+time = 1396137600;        %march 30 2014 00:00:00 (utc, timezone 0)
+time = time + 24*60*60;   %march 31 2014 00:00:00 (utc, timezone 0)
+if time >= 1396224000
+    day = 31;
+else
+    day = 30;
+end
 month = 3;
-day = 31;
 % hour = 8;
 % minute = 25;
 % second = 52;
@@ -38,8 +45,9 @@ day = 31;
 %eventTime = [11,29,33];
 %eventTime = [12,18,57];
 %eventTime = [12,22,39];
+eventTime = [12,41,54];
 %eventTime = [12,58,09];
-eventTime = [10,53,53];
+%eventTime = [10,53,53];
 
 hour = eventTime(1);
 minute = eventTime(2);
@@ -53,7 +61,8 @@ timezone = -8;
 %ddir = 'F:\20140331.005\';
 %ddir = 'C:\PFISR\Data\';
 %ddir = 'E:\20140330.007\';
-ddir = 'Z:\Radar\20140330.007\';
+%ddir = 'Z:\Radar\20140330.007\';
+ddir = 'Z:\Radar\20140331.007\';
 dsearch  = '*.dt0.h5';
 files = dir([ddir dsearch]);
 

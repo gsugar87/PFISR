@@ -1,4 +1,4 @@
-%run the anayzeSacedMeteors script
+%run the anayzeSavedMeteors script
 analyzeSavedMeteors
 
 %get constants

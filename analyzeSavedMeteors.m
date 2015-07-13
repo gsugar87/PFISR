@@ -1,17 +1,24 @@
-%% Updated read in the saved meteor data and do appropriate analysis
-% Some useful infotmation:
-% tUTCU is the times in matlab format, so datestr(tUTCU) gives the correct
-% UTC time (this is in days)
-% radar time (tms) is in unix time.  To convert to matlab time you need to
-% do: unix_time/86400 + datenum(1970,1,1))
-%clear all
+%{
+Updated read in the saved meteor data and do appropriate analysis
+Some useful infotmation:
+tUTCU is the times in matlab format, so datestr(tUTCU) gives the correct
+UTC time (this is in days)
+radar time (tms) is in unix time.  To convert to matlab time you need to
+do: unix_time/86400 + datenum(1970,1,1))
+
+NOTE:
+This script calls savedMeteorFilenames to get the meteors to analyze
+
+%}
+
+clear all
 close all
 
 %choose what meteor to read in
 %for meteorNumber = [1 2 3 4 5 6 7 9];
 %meteorsToAnalyze = [1 2 3 5 6 7 9 13 18 20 24 27 29];
-%pRangeFit =        [1 1 1 1 2 1 1  2  1  
-meteorsToAnalyze = 18;
+%pRangeFit =        [1 1 1 1 2 1 1  2  1
+meteorsToAnalyze = 13;
 pRangeFit = 1; %degree of polynomial to fit the radar range for optical range extrapolation
 velocitiesMean = zeros(1,numel(meteorsToAnalyze));
 velocitiesStd =  zeros(1,numel(meteorsToAnalyze));
@@ -24,6 +31,7 @@ meteorNumber = meteorsToAnalyze(meteorToAnalyzeIndex);
 %set show movies or not
 show_SBR = 0; %show a movie of the signal to background ratio
 show_signal = 0; %%show a movie of the signal (intensity - background)
+save_meteor = 0; % This is for saving the meteor for lorenzo
 plotPauseTime = 0.01; %pause time between SBR strip plots
 
 %set some needed constants
@@ -50,82 +58,12 @@ c = 2.998e8;
 wavelength = c/freq;
 
 %load in the beam patterns
+disp('Loading the beam patterns...')
 load('C:\Users\Glenn\Documents\MATLAB\PFISR\Radar\beamPatternNarrowUltra.mat')
 load('C:\Users\Glenn\Documents\MATLAB\PFISR\Radar\beamPatternWideUltra.mat')
 
-%create the filenames
-opticalFilenames = {'0330105633ultra.mat',
-    '0330105754ultra.mat',
-    '0330110015ultra.mat',
-    '0330111636ultra.mat',
-    '0330112439ultra.mat',
-    '0330114821ultra.mat',
-    '0330121306ultra.mat',
-    '0330122329ultra.mat',
-    '0330123903ultra.mat', %start the 31st data next line
-    '0331131516ultra.mat',
-    '033112598ultra.mat',
-    '033112589ultra.mat',
-    '0331124154ultra.mat',
-    '0331124035ultra.mat',
-    '0331122239ultra.mat',
-    '0331121857ultra.mat',
-    '0331113559ultra.mat',
-    '0331112933ultra.mat',
-    '0331112056ultra.mat',
-    '0331104642ultra.mat',
-    '033110388ultra.mat',
-    '0331101723ultra.mat',
-    '033110244ultra.mat',
-    '033195531ultra.mat',
-    '033194147ultra.mat',
-    '033193226ultra.mat',
-    '033192643ultra.mat',
-    '033192558ultra.mat',
-    '03319722ultra.mat',
-    '033182858ultra.mat'};
-radarFilenames = {'0331105634.mat',
-    '0331105754.mat',
-    '033111015.mat',
-    '0331111637.mat',
-    '0331112440.mat',
-    '0331114822.mat',
-    '033112137.mat',
-    '0331122329.mat',
-    '033112394.mat', %start of 31st data next line
-    '0331131516.mat',
-    '033112598.mat',
-    '033112589.mat',
-    '0331124154.mat',
-    '0331124035.mat',
-    '0331122239.mat',
-    '0331121857.mat',
-    '0331113559.mat',
-    '0331112933.mat',
-    '0331112056.mat',
-    '0331104642.mat',
-    '033110388.mat',
-    '0331101723.mat',
-    '033110244.mat',
-    '033195531.mat',
-    '033194147.mat',
-    '033193226.mat',
-    '033192643.mat',
-    '033192558.mat',
-    '03319722.mat',
-    '033182858.mat'};
-totalFramesAllMeteors = [13, 26, 14, 34, 55, 25, 41, 19, 17, 25];
-startFramesAllMeteors = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20,1,];
-goodHoughIndeces = {[2 3 4 5];
-    [2 3 4 5 6 7 8 9 10 11 12 14 15 16 17 18 19 ];
-    [ ];
-    [ ];
-    [ ];
-    [ ];
-    [ ];
-    [ ];
-    [ ];
-    [ ]};
+%create the filenames and useful inforemation
+savedMeteorFilenames
 
 %read in the desired meteor (different for 30th and 31st data)
 %load the radar and optical data
@@ -134,6 +72,7 @@ filenameRadar = radarFilenames{meteorNumber};
 load([directoryRadar filenameRadar])
 load([directoryOptical filenameOptical])
 
+%Here are some exceptions for certain meteors
 if meteorNumber <= 9
     numOpticalFrames = totalFramesAllMeteors(meteorNumber);
     startFrame = startFramesAllMeteors(meteorNumber);
@@ -411,6 +350,7 @@ for i = 1:numel(goodFrames)
 end
 %Now we have the azimuth, elevation, and time for the meteor at valid
 %frames
+
 %Now we need to use the radar data to get the range of the meteor at the
 %time of the valid frames
 %get the wide beam information
@@ -563,7 +503,9 @@ title('Meteor Ranges From Radar and Extrapolated to Optical Time')
 %%FOR LORENZO!!%%
 lorenzoTime = wideBeamTime(radarGoodIndeces);
 lorenzoRanges = radarGoodRanges;
-save([opticalFilenames{meteorNumber}(1:end-9) 'lorenzo.mat'],'lorenzoTime','lorenzoRanges')
+if save_meteor == 1
+    save([opticalFilenames{meteorNumber}(1:end-9) 'lorenzo.mat'],'lorenzoTime','lorenzoRanges')
+end
 
 %so now we have the range, azimuth, and elevation of the meteor
 %let's find the velocity!
